@@ -1,0 +1,43 @@
+services:
+  rabbitmq:
+    image: rabbitmq:3.9-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"   # порт для работы очереди
+      - "15672:15672" # порт для веб-интерфейса (RabbitMQ management)
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
+  orchestrator_service:
+    build: ./orchestrator_service
+    container_name: orchestrator_service
+    depends_on:
+      - rabbitmq
+    ports:
+      - "5000:5000"
+    environment:
+      - RABBIT_HOST=rabbitmq
+      - RABBIT_PORT=5672
+
+  payment_service:
+    build: ./payment_service
+    container_name: payment_service
+    depends_on:
+      - rabbitmq
+    ports:
+      - "5001:5000"
+    environment:
+      - RABBIT_HOST=rabbitmq
+      - RABBIT_PORT=5672
+
+  notification_service:
+    build: ./notification_service
+    container_name: notification_service
+    depends_on:
+      - rabbitmq
+    ports:
+      - "5002:5000"
+    environment:
+      - RABBIT_HOST=rabbitmq
+      - RABBIT_PORT=5672
